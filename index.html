@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>8 Puzzle</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            background: linear-gradient(135deg, #0a0a1f, #1a1a2e, #16213e);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        header {
+            padding: 20px 40px;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 255, 200, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00ffcc, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats {
+            display: flex;
+            gap: 40px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 1.9rem;
+            font-weight: 600;
+            color: #00ffcc;
+        }
+
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 70px;
+            padding: 40px 20px;
+        }
+
+        /* ==================== TARGET (Small Tiles) ==================== */
+        .target-panel {
+            text-align: center;
+        }
+
+        .target-label {
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .target-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 55px);
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.95);
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid rgba(0, 255, 200, 0.2);
+        }
+
+        .mini-tile {
+            width: 55px;
+            height: 55px;
+            border-radius: 10px;
+            background: linear-gradient(145deg, #1e2937, #334155);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #67e8f9;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5),
+                        inset 0 3px 8px rgba(255,255,255,0.1);
+            border: 1px solid #334155;
+        }
+
+        .mini-empty {
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px dashed #475569;
+            box-shadow: none;
+        }
+
+        /* ==================== MAIN PUZZLE (Bigger Tiles) ==================== */
+        .puzzle-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .puzzle {
+            display: grid;
+            grid-template-columns: repeat(3, 118px);
+            gap: 14px;
+            background: rgba(15, 23, 42, 0.95);
+            padding: 25px;
+            border-radius: 24px;
+            border: 2px solid rgba(0, 255, 200, 0.35);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        .tile {
+            width: 118px;
+            height: 118px;
+            border-radius: 18px;
+            background: linear-gradient(145deg, #1e2937, #334155);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: #00ffcc;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7),
+                        inset 0 6px 15px rgba(255,255,255,0.08);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            user-select: none;
+        }
+
+        .tile:hover {
+            transform: scale(1.08);
+            box-shadow: 0 18px 40px rgba(0, 255, 200, 0.4);
+        }
+
+        .tile.empty {
+            background: rgba(15, 23, 42, 0.5);
+            box-shadow: none;
+            cursor: default;
+        }
+
+        .tile.empty:hover {
+            transform: none;
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 35px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 14px 32px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-reset {
+            background: #334155;
+            color: #e2e8f0;
+        }
+
+        .btn-reset:hover {
+            background: #475569;
+        }
+
+        .btn-new {
+            background: linear-gradient(90deg, #00ffcc, #00d4b8);
+            color: #0f172a;
+        }
+
+        .btn-new:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 255, 200, 0.5);
+        }
+
+        .win-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.98);
+            padding: 50px 70px;
+            border-radius: 24px;
+            border: 4px solid #00ffcc;
+            font-size: 3rem;
+            font-weight: 700;
+            text-align: center;
+            box-shadow: 0 0 100px rgba(0, 255, 200, 0.7);
+            display: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <header>
+            <div class="title">8 PUZZLE</div>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">Moves</div>
+                    <div class="stat-value" id="moveCount">0</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Target -->
+            <div class="target-panel">
+                <div class="target-label">TARGET CONFIGURATION</div>
+                <div class="target-grid" id="target"></div>
+            </div>
+
+            <!-- Main Puzzle -->
+            <div class="puzzle-wrapper">
+                <div class="puzzle" id="puzzle"></div>
+                
+                <div class="controls">
+                    <button class="btn-reset" id="resetBtn">Reset</button>
+                    <button class="btn-reset" id="undoBtn">Undo</button>
+                    <button class="btn-new" id="newGameBtn">New Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Win Message -->
+    <div class="win-message" id="winMessage">
+        🎉 Congratulations! 🎉<br>
+        <span style="font-size: 1.5rem; color: #94a3b8;">You solved it in <span id="finalMoves">0</span> moves!</span>
+    </div>
+
+    <script>
+        let moves = 0;
+        let puzzleState = [];
+        let history = [];
+        const targetState = [1, 2, 3, 4, 5, 6, 7, 8, null];
+
+        const puzzleContainer = document.getElementById('puzzle');
+        const targetContainer = document.getElementById('target');
+        const moveCountEl = document.getElementById('moveCount');
+        const winMessage = document.getElementById('winMessage');
+        const finalMovesEl = document.getElementById('finalMoves');
+
+        function createTile(value, isTarget = false) {
+            const tile = document.createElement('div');
+            
+            if (isTarget) {
+                tile.className = value === null ? 'mini-tile mini-empty' : 'mini-tile';
+                if (value !== null) tile.textContent = value;
+            } else {
+                tile.className = value === null ? 'tile empty' : 'tile';
+                if (value !== null) tile.textContent = value;
+            }
+            return tile;
+        }
+
+        function renderGrid(container, state, isTarget = false) {
+            container.innerHTML = '';
+            state.forEach((value, index) => {
+                const tile = createTile(value, isTarget);
+                if (!isTarget && value !== null) {
+                    tile.addEventListener('click', () => moveTile(index));
+                }
+                container.appendChild(tile);
+            });
+        }
+
+        function findEmpty() {
+            return puzzleState.indexOf(null);
+        }
+
+        function isAdjacent(a, b) {
+            const rowA = Math.floor(a / 3), colA = a % 3;
+            const rowB = Math.floor(b / 3), colB = b % 3;
+            return Math.abs(rowA - rowB) + Math.abs(colA - colB) === 1;
+        }
+
+        function saveHistory() {
+            history.push([...puzzleState]);
+            if (history.length > 30) history.shift();
+        }
+
+        function moveTile(index) {
+            const emptyIndex = findEmpty();
+            if (!isAdjacent(index, emptyIndex)) return;
+
+            saveHistory();
+            [puzzleState[index], puzzleState[emptyIndex]] = [puzzleState[emptyIndex], puzzleState[index]];
+            
+            moves++;
+            moveCountEl.textContent = moves;
+
+            renderGrid(puzzleContainer, puzzleState);
+            checkWin();
+        }
+
+        function checkWin() {
+            if (puzzleState.every((val, i) => val === targetState[i])) {
+                finalMovesEl.textContent = moves;
+                setTimeout(() => {
+                    winMessage.style.display = 'block';
+                }, 300);
+            }
+        }
+
+        function shuffle(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function startGame() {
+            moves = 0;
+            history = [];
+            moveCountEl.textContent = '0';
+            winMessage.style.display = 'none';
+
+            do {
+                puzzleState = shuffle(targetState);
+            } while (JSON.stringify(puzzleState) === JSON.stringify(targetState));
+
+            renderGrid(targetContainer, targetState, true);
+            renderGrid(puzzleContainer, puzzleState);
+        }
+
+        // Buttons
+        document.getElementById('newGameBtn').addEventListener('click', startGame);
+        
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (history.length > 0) {
+                puzzleState = [...history[history.length - 1]];
+                moves = Math.max(0, moves - 1);
+                moveCountEl.textContent = moves;
+                renderGrid(puzzleContainer, puzzleState);
+            }
+        });
+
+        document.getElementById('undoBtn').addEventListener('click', () => {
+            if (history.length > 0) {
+                puzzleState = history.pop();
+                moves = Math.max(0, moves - 1);
+                moveCountEl.textContent = moves;
+                renderGrid(puzzleContainer, puzzleState);
+            }
+        });
+
+        // Keyboard shortcut
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'r') startGame();
+        });
+
+        // Start the game
+        window.onload = startGame;
+    </script>
+</body>
+</html>
