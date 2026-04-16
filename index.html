@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>8 Puzzle</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="game-container">
+        <header>
+            <div class="title">8 PUZZLE</div>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">Moves</div>
+                    <div class="stat-value" id="moveCount">0</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Target -->
+            <div class="target-panel">
+                <div class="target-label">TARGET CONFIGURATION</div>
+                <div class="target-grid" id="target"></div>
+            </div>
+
+            <!-- Main Puzzle -->
+            <div class="puzzle-wrapper">
+                <div class="puzzle" id="puzzle"></div>
+                
+                <div class="controls">
+                    <button class="btn-reset" id="resetBtn">Reset</button>
+                    <button class="btn-reset" id="undoBtn">Undo</button>
+                    <button class="btn-new" id="newGameBtn">New Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Win Message -->
+    <div class="win-message" id="winMessage">
+        🎉 Congratulations! 🎉<br>
+        <span style="font-size: 1.5rem; color: #94a3b8;">You solved it in <span id="finalMoves">0</span> moves!</span>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
